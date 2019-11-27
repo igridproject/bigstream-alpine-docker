@@ -11,8 +11,7 @@ RUN node script/install_plugins.js
 FROM node:8.16.2-alpine
 
 COPY --from=0 /app/bigstream /app/bigstream
-
-RUN npm install -y pm2@latest -g && mkdir -p /var/bigstream/data
+RUN npm config set unsafe-perm true && npm install -y pm2@latest -g && mkdir -p /var/bigstream/data
 
 EXPOSE 19980 19080 19180
 
