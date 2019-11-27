@@ -1,0 +1,49 @@
+version: '3'
+services:
+  bigstream:
+    image: "bigstream:dev"
+    build:
+       context: .
+       dockerfile: Dockerfile
+       args: 
+        - PROCESS_NUM=${PROCESS_NUM}
+    container_name: bs${PREFIX_NO}_bigstream
+    restart: always
+    networks:
+     - bsnet
+    ports:
+     - "${PREFIX_NO}980:19980"
+     - "${PREFIX_NO}080:19080"
+     - "${PREFIX_NO}180:19180"
+     - "${PREFIX_NO}150:19150/udp"
+    environment:
+     - "BS_SECRET=${BS_SECRET}"
+    volumes:
+     - ${VOLUME}/bigstream/data:/var/bigstream/data
+  redis:
+    image: "redis:${REDIS_TAG}"
+    command: redis-server --appendonly yes
+    container_name: bs${PREFIX_NO}_redis_server
+    restart: always
+    networks:
+       bsnet:
+          aliases:
+             - redis-server
+    ports:
+     - "${PREFIX_NO}379:6379"
+    volumes:
+     - ${VOLUME}/redis/data:/data
+  rabbitmq:
+    image: "igridproject/rabbitmq"
+    command: rabbitmq-server --hostname rabbitmq-server
+    container_name: bs${PREFIX_NO}_rabbitmq_server
+    restart: always
+    networks:
+       bsnet:
+          aliases:
+             - rabbitmq-server
+    ports:
+     - "${PREFIX_NO}672:5672"
+networks:
+  bsnet:
+     driver: bridge
